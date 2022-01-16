@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class SubmitScanActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
@@ -35,7 +36,8 @@ public class SubmitScanActivity extends AppCompatActivity {
         textView.setText(scanText);
 
         final Date scanTime = new Date();
-        final DateFormat df = new SimpleDateFormat("yyyy-mm-dd HH:MM:SS");
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
         final TextView textViewScanTime = findViewById(R.id.textViewScanTime);
         textViewScanTime.setText(df.format(scanTime));
 
