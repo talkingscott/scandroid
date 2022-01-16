@@ -1,6 +1,6 @@
 # scandroid
 
-A quickly hacked Android app that scans a QR code and gets geolocation data.
+A quickly hacked Android app that scans a QR code, gets geolocation data, and posts to a URL.
 
 ## Acknowledgments
 

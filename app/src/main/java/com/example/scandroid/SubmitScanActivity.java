@@ -12,6 +12,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +22,7 @@ import java.util.TimeZone;
 
 public class SubmitScanActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
+    private final static String url = "https://your.cloudfront.net/api/v1/qrcode";
 
     @SuppressLint("MissingPermission")
     @Override
@@ -48,10 +51,32 @@ public class SubmitScanActivity extends AppCompatActivity {
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            TextView textViewLocation = findViewById(R.id.textViewLocation);
                             final double latitude = location.getLatitude();
                             final double longitude = location.getLongitude();
+                            final double accuracy = location.getAccuracy();
+                            TextView textViewLocation = findViewById(R.id.textViewLocation);
                             textViewLocation.setText(Double.toString(latitude) + " " + Double.toString(longitude));
+                            JSONObject jsonParam = new JSONObject();
+                            try {
+                                jsonParam.put("qrcode", scanText);
+                                jsonParam.put("latitude", latitude);
+                                jsonParam.put("longitude", longitude);
+                                jsonParam.put("accuracy", accuracy);
+                                jsonParam.put("user", "placeholder");
+                                jsonParam.put("submitted", scanTime.getTime());
+                            } catch (Exception ex) {
+                                // queue for later and Toast?
+                            }
+                            Http.postJSON(url, jsonParam, statusCode -> {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        TextView textViewStatusCode = findViewById(R.id.textViewStatusCode);
+                                        textViewStatusCode.setText(Integer.toString(statusCode));
+                                    }
+                                });
+
+                            });
                         }
                     }
                 });

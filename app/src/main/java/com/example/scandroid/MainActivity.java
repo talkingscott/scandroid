@@ -59,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
             // Skip the shouldShowRequestPermissionRationale(...) logic for this hack.
             // You can directly ask for the permission.
             // The registered ActivityResultCallback gets the result of this request.
-            requestPermissionLauncher.launch(new String[] { Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION });
+            requestPermissionLauncher.launch(new String[] {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.INTERNET
+            });
         }
     }
 
@@ -83,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         return (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_GRANTED)
                 && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED)
+                && (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                 == PackageManager.PERMISSION_GRANTED);
     }
 
