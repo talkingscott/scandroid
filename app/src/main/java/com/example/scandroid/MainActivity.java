@@ -18,6 +18,8 @@ import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.google.zxing.Result;
 
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.example.scandroid.SCANTEXT";
     private CodeScanner mCodeScanner;
@@ -25,9 +27,17 @@ public class MainActivity extends AppCompatActivity {
     // Register the permissions callback, which handles the user's response to the
     // system permissions dialog. Save the return value, an instance of
     // ActivityResultLauncher, as an instance variable.
-    final private ActivityResultLauncher<String> requestPermissionLauncher =
-        registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            if (isGranted) {
+    final private ActivityResultLauncher<String[]> requestPermissionLauncher =
+        registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), areGranted -> {
+            // TODO: use streams
+            boolean allGranted = true;
+            for (Map.Entry<String, Boolean> result : areGranted.entrySet()) {
+                if (!result.getValue().booleanValue()) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted) {
                 setUpScanner();
             } else {
                 // Explain to the user that the feature is unavailable because the
@@ -43,14 +53,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (havePermissions()) {
             setUpScanner();
         } else {
             // Skip the shouldShowRequestPermissionRationale(...) logic for this hack.
             // You can directly ask for the permission.
             // The registered ActivityResultCallback gets the result of this request.
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA);
+            requestPermissionLauncher.launch(new String[] { Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION });
         }
     }
 
@@ -70,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    private boolean havePermissions() {
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED)
+                && (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
     private void setUpScanner() {
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(this, scannerView);
@@ -82,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         Intent intent = new Intent(activity, SubmitScanActivity.class);
                         String message = result.getText();
-                        intent.putExtra(EXTRA_MESSAGE, message + "\nAnd another line\nAnother");
+                        intent.putExtra(EXTRA_MESSAGE, message);
                         startActivity(intent);
                     }
                 });
